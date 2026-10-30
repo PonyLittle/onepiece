@@ -1,0 +1,676 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+<title>海贼王人格测试</title>
+<style>
+*{
+  margin:0;
+  padding:0;
+  box-sizing:border-box;
+  font-family:"Microsoft Yahei","PingFang SC",sans-serif;
+  color:#fff;
+}
+body{
+  min-height:100vh;
+  background:#000;
+  background-image:url("E:\\Pony\\公众号\\海贼王\\background.jpeg");
+  background-size:cover;
+  background-position:center;
+  background-attachment:fixed;
+}
+/* 外层遮罩 */
+.mask{
+  min-height:100vh;
+  background:rgba(0,0,0,0.45);
+  padding:24px 12px 40px;
+  display:flex;
+  align-items:flex-start;
+  justify-content:center;
+}
+/* 内容卡片：400px小游戏内嵌感 + 金色外发光 */
+.page{
+  display:none;
+  width:100%;
+  max-width:400px;
+  background:rgba(15,15,15,0.82);
+  border:1px solid rgba(212,175,55,0.45);
+  border-radius:20px;
+  padding:22px 18px 20px;
+  box-shadow:
+    0 0 18px rgba(212,175,55,0.25),
+    0 10px 30px rgba(0,0,0,0.45);
+  transition:transform 0.25s ease, box-shadow 0.25s ease;
+}
+.page.active{
+  display:block;
+  animation:cardIn 0.35s ease both;
+}
+@keyframes cardIn{
+  from{
+    opacity:0;
+    transform:translateY(12px) scale(0.98);
+  }
+  to{
+    opacity:1;
+    transform:translateY(0) scale(1);
+  }
+}
+/* 首页 */
+#page-home{
+  text-align:center;
+  padding-top:28px;
+  padding-bottom:28px;
+}
+#page-home h1{
+  font-size:24px;
+  margin-bottom:10px;
+  color:#ffd700;
+}
+#page-home p{
+  font-size:14px;
+  color:#ccc;
+  margin-bottom:16px;
+  line-height:1.6;
+}
+.age-title{
+  font-size:15px;
+  color:#ffd700;
+  margin-bottom:10px;
+}
+.age-opt{
+  border:1px solid rgba(255,255,255,0.12);
+  border-radius:14px;
+  padding:12px 13px;
+  margin-bottom:10px;
+  cursor:pointer;
+  background:rgba(255,255,255,0.04);
+  transition:
+    transform 0.22s ease,
+    border-color 0.22s ease,
+    background 0.22s ease;
+}
+.age-opt:hover{
+  border-color:rgba(212,175,55,0.55);
+  background:rgba(212,175,55,0.10);
+}
+.age-opt.selected{
+  border-color:#ffd700;
+  background:rgba(212,175,55,0.20);
+}
+#btnStart{
+  margin-top:12px;
+}
+/* 答题页 */
+#page-quiz{
+  padding-top:18px;
+  padding-bottom:90px;
+}
+.progressText{
+  font-size:13px;
+  color:#bbb;
+  margin-bottom:12px;
+  text-align:center;
+}
+#qText{
+  font-size:17px;
+  line-height:1.6;
+  margin-bottom:16px;
+  color:#fff3c4;
+  font-weight:600;
+}
+/* 选项 */
+.opt{
+  border:1px solid rgba(255,255,255,0.12);
+  border-radius:14px;
+  padding:12px 13px;
+  margin-bottom:10px;
+  display:flex;
+  gap:10px;
+  cursor:pointer;
+  background:rgba(255,255,255,0.04);
+  transition:
+    transform 0.22s ease,
+    border-color 0.22s ease,
+    background 0.22s ease,
+    box-shadow 0.22s ease;
+}
+.opt:hover{
+  border-color:rgba(212,175,55,0.55);
+  background:rgba(212,175,55,0.10);
+  transform:translateY(-2px) scale(1.015);
+  box-shadow:0 6px 18px rgba(212,175,55,0.18);
+}
+.opt.selected{
+  border-color:#ffd700;
+  background:rgba(212,175,55,0.20);
+  box-shadow:
+    0 0 0 1px rgba(255,215,0,0.35),
+    0 8px 20px rgba(212,175,55,0.28);
+  animation:goldPulse 1.6s ease-in-out infinite alternate;
+}
+@keyframes goldPulse{
+  from{
+    box-shadow:
+      0 0 0 1px rgba(255,215,0,0.35),
+      0 8px 20px rgba(212,175,55,0.28);
+  }
+  to{
+    box-shadow:
+      0 0 0 1px rgba(255,215,0,0.55),
+      0 10px 24px rgba(212,175,55,0.42);
+  }
+}
+.opt-label{
+  font-weight:bold;
+  color:#ffd700;
+  min-width:22px;
+  font-size:15px;
+}
+.opt-text{
+  flex:1;
+  font-size:14px;
+  line-height:1.55;
+}
+/* 底部操作栏：恢复上一题/下一题按钮 */
+.bottom-bar{
+  position:fixed;
+  left:0;
+  right:0;
+  bottom:0;
+  padding:12px;
+  background:linear-gradient(to top, rgba(0,0,0,0.75), rgba(0,0,0,0));
+  display:flex;
+  justify-content:center;
+  gap:12px;
+  z-index:10;
+}
+button{
+  padding:11px 22px;
+  border-radius:12px;
+  border:1px solid rgba(255,255,255,0.15);
+  background:rgba(30,30,30,0.85);
+  color:#fff;
+  font-size:15px;
+  cursor:pointer;
+  transition:
+    transform 0.18s ease,
+    filter 0.18s ease,
+    box-shadow 0.18s ease;
+}
+button:hover{
+  transform:translateY(-1px) scale(1.02);
+  filter:brightness(1.08);
+  box-shadow:0 6px 16px rgba(0,0,0,0.35);
+}
+button:active{
+  transform:translateY(0) scale(0.98);
+  filter:brightness(0.95);
+}
+button:disabled{
+  opacity:0.35;
+  cursor:not-allowed;
+  transform:none;
+  filter:none;
+  box-shadow:none;
+}
+#nextBtn, #btnStart, #restartBtn{
+  background:linear-gradient(135deg,#ffd700,#d4af37);
+  color:#2b2200;
+  border:none;
+  font-weight:bold;
+  transition:
+    transform 0.18s ease,
+    filter 0.18s ease,
+    box-shadow 0.18s ease;
+}
+#nextBtn:hover, #btnStart:hover, #restartBtn:hover{
+  filter:brightness(1.12);
+  box-shadow:0 8px 20px rgba(212,175,55,0.45);
+}
+/* 结果页 */
+#page-result{
+  padding-top:20px;
+  padding-bottom:24px;
+}
+#resAvatar{
+  width:110px;
+  height:110px;
+  border-radius:50%;
+  object-fit:cover;
+  margin:0 auto 10px;
+  border:3px solid #ffd700;
+  display:block;
+  background:#222;
+}
+#charName{
+  text-align:center;
+  font-size:22px;
+  color:#ffd700;
+  font-weight:bold;
+  margin-bottom:4px;
+}
+#charTag{
+  text-align:center;
+  font-size:13px;
+  color:#ccc;
+  margin-bottom:16px;
+}
+.bar-wrap{
+  margin:14px 0 18px;
+}
+.bar-item{
+  margin:9px 0;
+}
+.bar-label{
+  font-size:13px;
+  color:#eee;
+  margin-bottom:4px;
+}
+.bar{
+  width:100%;
+  height:9px;
+  background:rgba(255,255,255,0.08);
+  border-radius:6px;
+  overflow:hidden;
+}
+.bar>div{
+  height:100%;
+  background:linear-gradient(90deg,#ffd700,#d4af37);
+  position:relative;
+  overflow:hidden;
+}
+/* 进度条流光 */
+.bar>div::after{
+  content:"";
+  position:absolute;
+  top:0;
+  left:-40%;
+  width:40%;
+  height:100%;
+  background:linear-gradient(90deg,transparent,rgba(255,255,255,0.35),transparent);
+  animation:shine 2.4s infinite;
+}
+@keyframes shine{
+  0%{left:-40%}
+  60%{left:100%}
+  100%{left:100%}
+}
+.desc{
+  line-height:1.7;
+  font-size:14px;
+}
+.desc>div{
+  margin-bottom:14px;
+}
+.desc strong{
+  color:#ffd700;
+  font-size:15px;
+  display:block;
+  margin-bottom:6px;
+}
+.same-tag{
+  display:inline-block;
+  padding:4px 10px;
+  background:rgba(212,175,55,0.12);
+  border:1px solid rgba(212,175,55,0.25);
+  border-radius:99px;
+  margin:4px 4px 0 0;
+  font-size:13px;
+  color:#ffe49c;
+}
+#restartBtn{
+  margin-top:18px;
+  width:100%;
+}
+/* 小屏适配 */
+@media (max-width: 420px){
+  .page{
+    max-width:92%;
+    padding:18px 14px 16px;
+  }
+  #page-quiz{
+    padding-bottom:82px;
+  }
+  #qText{
+    font-size:16px;
+  }
+  .opt-text{
+    font-size:13.5px;
+  }
+}
+</style>
+</head>
+<body>
+<div class="mask">
+  <!-- 首页（增加年龄段选择） -->
+  <div id="page-home" class="page active">
+    <h1>海贼王人格测试</h1>
+    <p>30道题测出你的灵魂角色<br>你更像路飞、索隆、罗宾，还是其他角色？</p>
+    <div class="age-title">请选择你的年龄段</div>
+    <div class="age-opt" data-age="A">A｜少年组 8–14岁（童趣直白，重热血友情）</div>
+    <div class="age-opt" data-age="B">B｜青年组 15–30岁（侧重梦想、羁绊、成长）</div>
+    <div class="age-opt" data-age="C">C｜成年组 31岁以上（侧重秩序博弈、现实思考）</div>
+    <button id="btnStart" disabled>开始测试</button>
+  </div>
+
+  <!-- 答题页面 -->
+  <div id="page-quiz" class="page">
+    <div class="progressText">第 <span id="curIndex">1</span> / <span id="totalIndex">30</span> 题</div>
+    <div id="qText"></div>
+    <div id="optBox"></div>
+  </div>
+
+  <!-- 底部按钮：恢复上一题/下一题 -->
+  <div class="bottom-bar">
+    <button id="prevBtn">上一题</button>
+    <button id="nextBtn">下一题</button>
+  </div>
+
+  <!-- 结果页面 -->
+  <div id="page-result" class="page">
+    <img id="resAvatar" alt="头像" onerror="this.src='data:image/svg+xml;utf8,<svg xmlns=%22http://www.w3.org/2000/svg%22 viewBox=%220 0 100 100%22><rect width=%22100%22 height=%22100%22 fill=%22%23333%22/><text x=%2250%22 y=%2255%22 font-size=%2240%22 text-anchor=%22middle%22 fill=%22%23ffd200%22>?</text></svg>'">
+    <div id="charName"></div>
+    <div id="charTag"></div>
+
+    <div class="bar-wrap">
+      <div class="bar-item">
+        <div class="bar-label">🔥 自由热血</div>
+        <div class="bar"><div id="barFree"></div></div>
+      </div>
+      <div class="bar-item">
+        <div class="bar-label">⚔ 硬核执念</div>
+        <div class="bar"><div id="barWill"></div></div>
+      </div>
+      <div class="bar-item">
+        <div class="bar-label">💛 温柔仁义</div>
+        <div class="bar"><div id="barGentle"></div></div>
+      </div>
+      <div class="bar-item">
+        <div class="bar-label">🧠 理智谋略</div>
+        <div class="bar"><div id="barWise"></div></div>
+      </div>
+    </div>
+
+    <div class="desc">
+      <div><strong>✨ 你的人格解析</strong><span id="charAnalysis"></span></div>
+      <div><strong>⭐ 人格闪光点</strong><span id="charGood"></span></div>
+      <div><strong>⚠ 小短板提示</strong><span id="charBad"></span></div>
+      <div><strong>🤝 适合结伴的伙伴</strong><span id="charMate"></span></div>
+      <div><strong>🔍 同类型角色</strong><span id="sameBox"></span></div>
+    </div>
+
+    <button id="restartBtn">重新测试</button>
+  </div>
+
+</div>
+
+<script>
+"use strict";
+const questionList = [
+  {q:"遇到一件很想做的事，你优先？",o:["A 说干就干，享受自由冒险","B 认定目标，不达目的不罢休","C 先顾及身边人的感受","D 权衡利弊，规划清楚再行动","E 折中，看情况"]},
+  {q:"朋友陷入麻烦，你第一反应？",o:["A 直接冲上去帮忙","B 拼尽全力帮他到底","C 安抚情绪，温柔陪伴","D 思考怎么用最优方案解决","E 视风险而定"]},
+  {q:"你更向往哪种生活？",o:["A 无拘无束，到处闯荡","B 不断变强，追逐梦想","C 安稳温暖，守护所爱","D 运筹帷幄，掌控局面","E 劳逸结合"]},
+  {q:"做决定时，你更容易？",o:["A 凭直觉和喜好","B 凭信念与坚持","C 凭良心和共情","D 凭逻辑和证据","E 多方兼顾"]},
+  {q:"被人误解，你会？",o:["A 懒得解释，做自己就好","B 坚持自己，用结果证明","C 耐心沟通，希望互相理解","D 冷静梳理，讲清逻辑","E 看有没有解释的必要"]},
+  {q:"团队里你更像？",o:["A 带动气氛的开拓者","B 永不放弃的攻坚者","C 照顾大家的守护者","D 出谋划策的智囊","E 配合所有人的调和者"]},
+  {q:"面对未知危险，你？",o:["A 兴奋好奇，想去看看","B 迎难而上，绝不退缩","C 优先保护同伴撤退","D 先评估风险再行动","E 谨慎观望"]},
+  {q:"你最看重？",o:["A 自由，不被束缚","B 承诺，永不认输","C 情义，善待他人","D 理性，避免失误","E 平衡各方"]},
+  {q:"计划被打乱，你的感受？",o:["A 无所谓，随机应变","B 不甘心，想拉回正轨","C 担心会不会影响别人","D 烦躁，重新复盘方案","E 接受变动"]},
+  {q:"别人求助你，你？",o:["A 爽快答应一起玩一起闯","B 答应了就一定会做到","C 不忍心拒绝，愿意帮忙","D 判断自己能不能胜任","E 量力而行"]},
+  {q:"失败之后，你？",o:["A 很快调整，继续出发","B 不甘心，加倍苦练","C 难过，需要陪伴治愈","D 复盘哪里出错","E 接受失败"]},
+  {q:"和别人产生分歧，你？",o:["A 不想争吵，各自自在","B 坚持自己的道路","C 尽量包容、换位思考","D 讲道理，分出对错","E 求同存异"]},
+  {q:"空闲时间更喜欢？",o:["A 出去玩、探索新鲜事物","B 打磨技能、提升自己","C 和亲友待在一起","D 看书、思考、研究","E 多种方式轮换"]},
+  {q:"面对不公平，你？",o:["A 直接站出来反抗","B 持续对抗恶势力","C 同情弱者，温柔帮扶","D 寻找规则漏洞解决","E 量力而行"]},
+  {q:"你相信梦想吗？",o:["A 梦想就是用来冲的！","B 拼上一切也要实现","C 希望大家都能圆梦","D 梦想需要现实支撑","E 梦想和现实兼顾"]},
+  {q:"和伙伴走散，你？",o:["A 到处去找，随心寻找","B 坚信一定会重逢","C 担心对方安危","D 分析对方可能的路线","E 原地等待+寻找结合"]},
+  {q:"别人夸奖你，你？",o:["A 开心，继续自在下去","B 继续变强，不负期待","C 有点不好意思，谦虚待人","D 冷静评估是不是属实","E 礼貌感谢"]},
+  {q:"需要牺牲一部分利益，你？",o:["A 不想牺牲自由","B 为目标可以承受牺牲","C 优先不让别人受苦","D 计算牺牲的收益","E 尽量减少牺牲"]},
+  {q:"新的机会出现，你？",o:["A 立刻抓住，体验一把","B 抓住机会完成目标","C 看会不会伤害别人","D 评估长期价值","E 谨慎选择"]},
+  {q:"你讨厌？",o:["A 被约束、被管制","B 半途而废、背叛约定","C 冷酷、欺负弱小","D 混乱、不讲道理","E 极端的选择"]},
+  {q:"学习新东西，你？",o:["A 边玩边学","B 反复练习直到精通","C 愿意和别人一起学","D 找教程梳理体系","E 多种方式结合"]},
+  {q:"旅途里你更在意？",o:["A 风景和新鲜感","B 终点的目标","C 和同行人的回忆","D 路线是否安全高效","E 全都兼顾"]},
+  {q:"被迫妥协，你？",o:["A 内心抗拒，向往自由","B 只是暂时蛰伏，绝不放弃","C 为了保护他人可以妥协","D 妥协是策略","E 权衡之后妥协"]},
+  {q:"看到弱小被欺负，你？",o:["A 直接出手制止","B 持续对抗恶势力","C 温柔安抚受害者","D 寻找合理方式制裁","E 看自身能力"]},
+  {q:"你做选择的底色？",o:["A 遵从本心热爱","B 永不言弃的执念","C 善良共情","D 冷静理智","E 中庸平衡"]},
+  {q:"如果可以拥有一种能力，优先？",o:["A 去往任何地方的自由","B 打败强敌的力量","C 治愈伤痛的能力","D 看透一切的智慧","E 均衡全能"]},
+  {q:"和朋友理念冲突，你？",o:["A 尊重，各自走各自的路","B 希望他理解我的坚持","C 不想伤害感情","D 理性辩论","E 保留分歧继续相处"]},
+  {q:"压力大的时候，你？",o:["A 放空、去玩释放","B 咬牙硬扛","C 和人倾诉寻求安慰","D 拆解压力逐个解决","E 多种方式减压"]},
+  {q:"你对承诺的态度？",o:["A 开心就遵守，不勉强","B 承诺重于一切","C 不忍心辜负别人","D 承诺要考虑可行性","E 谨慎许诺"]},
+  {q:"如果让你组建海贼团，你？",o:["A 找志同道合有趣的伙伴","B 找能一起奔赴梦想的战友","C 接纳所有需要温暖的人","D 搭配互补、各司其职","E 兼顾趣味与稳定"]}
+];
+
+// 角色文案库：A少年 / B青年 / C成年 三套文案
+const charList = [
+  {
+    name:"蒙奇·D·路飞",
+    tag:"草帽海贼团船长｜热爱自由的追梦人",
+    avatar:"./avatar/luffy.png",
+    free:26,will:18,gentle:20,wise:10,
+    a:{analysis:"你超级喜欢冒险！想和好朋友一起出海，想去哪个岛就去哪，大口吃肉，保护伙伴，做最开心的海盗！",good:"勇敢、真诚，很会带动大家一起玩，愿意保护好朋友。",bad:"有时候太冲动，没有多想危险，容易莽撞。",mate:"靠谱、会思考的伙伴，帮你避开危险。"},
+    b:{analysis:"你骨子里向往无拘无束的大海，讨厌被条条框框束缚，不喜欢复杂的算计与人心博弈。你习惯遵从本心行事，伙伴在你心中的分量胜过一切，愿意为守护重要的人赌上自己的性命。你活在当下，永远对未知的冒险抱有滚烫期待，相信真诚与热血可以跨越所有阻碍。",good:"待人纯粹真诚，重情义，感染力极强，敢于打破现状，永远保有少年的勇气。",bad:"做事容易冲动，常常忽略潜在风险，有时会因为太信任别人而吃亏，不太擅长深思熟虑。",mate:"适合心思缜密的智囊、意志坚定的战友结伴同行，帮你规避莽撞带来的麻烦。"},
+    c:{analysis:"路飞追求的自由，本质是拒绝被固化秩序、权力与利益绑架的自主选择权。这份自由自带边界，他不会以自由为名伤害他人，愿意为守护伙伴承担代价。你同样拥有这份底色：不被世俗规则裹挟，同时懂得自由不是无底线任性。",good:"本心纯粹，不被利益绑架，有担当，愿意为珍视的人付出代价。",bad:"容易轻视规则的约束，缺少风险预判，容易因为感性选择付出较高代价。",mate:"理性稳重的同行者，帮你在坚持本心的同时看懂现实代价。"}
+  },
+  {
+    name:"罗罗诺亚·索隆",
+    tag:"草帽海贼团剑士｜信守约定的孤高强者",
+    avatar:"./avatar/zoro.png",
+    free:14,will:27,gentle:16,wise:18,
+    a:{analysis:"你很厉害，不怕辛苦！定下目标就会一直努力练习，虽然话不多，但是会拼尽全力保护伙伴。",good:"说到做到，不怕吃苦，很可靠，大家可以信任你。",bad:"有时候太固执，不肯换别的办法，也不爱说出自己的难过。",mate:"细心会规划的朋友，帮你少走弯路。"},
+    b:{analysis:"你的人格底色是坚守与执念。一旦许下约定，就会拼尽一切去完成，能够忍受漫长、枯燥、孤独的打磨。你话不多，行动永远大于言语，外表冷峻疏离，内心却十分看重同伴，愿意替伙伴扛下伤痛。你认准自己的道路就不会轻易动摇，越是身处逆境，越能激发你的斗志，沉默地向着目标稳步前行。",good:"极度守诺，抗压能力极强，困境之中绝不认输，稳重可靠，是可以托付后背的人。",bad:"容易死磕一条路，变通能力偏弱，不擅长表达柔软情绪，习惯独自硬扛所有压力。",mate:"适合心思细腻、善于规划的伙伴，帮你看见更多可能性，避开不必要的弯路。"},
+    c:{analysis:"你认同契约与责任的重量，愿意为长期目标忍受孤独与枯燥。你明白很多路只能自己走，但也懂得守护同盟的意义。你信奉实力与承诺，但容易把“坚持”等同于“唯一解法”。",good:"责任心强、执行力稳定，逆境可靠，有底线。",bad:"变通不足，习惯独自承压，不擅长借力，容易在单一赛道内耗。",mate:"格局开阔的伙伴，提醒你目标不止一条实现路径。"}
+  },
+  {
+    name:"山治",
+    tag:"草帽海贼团厨师｜温柔的骑士道守护者",
+    avatar:"./avatar/sanji.png",
+    free:17,will:19,gentle:26,wise:14,
+    a:{analysis:"你很温柔，会照顾别人，心疼弱小的人。就算自己不开心，也愿意好好对待身边的伙伴。",good:"贴心善良，会照顾大家，有自己的原则，不会欺负别人。",bad:"容易心软，别人一难过你就忍不住帮忙，容易吃亏。",mate:"冷静理智的伙伴，提醒你分清什么时候该帮忙。"},
+    b:{analysis:"骑士精神深深刻在你的性格深处。你的内心柔软善良，天生共情弱者，习惯性体恤身边每一个人的情绪。你习惯默默付出，把温柔留给身边的人，哪怕自己受过苦难，也不愿意丢掉心中的道义底线。你有自己不容打破的原则，愿意为守护他人挺身而出，温柔是你最强大的铠甲。",good:"共情力强，待人宽厚体贴，懂得照顾他人感受，拥有高贵的道义底线，内心温柔炽热。",bad:"容易感情用事，心软会成为软肋，偶尔会因为共情别人，做出不利于大局的选择。",mate:"适合果决理智的同伴，在你被情绪裹挟的时候拉回现实，帮你权衡利弊。"},
+    c:{analysis:"你把道义和共情放在很高位置，懂得善待弱者，认为善意本身就是一种原则。但你也需要看见：善意不等于无边界的付出，慈悲也需要建立在自保与大局之上。",good:"有同理心、有底线，懂得尊重他人，愿意帮扶弱者。",bad:"容易被情绪绑架，在利益冲突时优先感性，忽略全局权衡。",mate:"理性的伙伴，帮你守住善意的同时守住边界。"}
+  },
+  {
+    name:"妮可·罗宾",
+    tag:"草帽海贼团考古学家｜冷静通透的谋略者",
+    avatar:"./avatar/robin.png",
+    free:12,will:17,gentle:18,wise:27,
+    a:{analysis:"你很聪明，喜欢观察、思考事情，遇到事情不容易慌张，安静又温柔。",good:"聪明冷静，善于观察，很会思考问题。",bad:"心里的想法不爱说出来，喜欢自己憋着。",mate:"热情直率的伙伴，陪你说出心里的想法。"},
+    b:{analysis:"你善于观察与思考，习惯用理性看待世间百态。见过黑暗、历经颠沛之后，依旧保留内心的温度。遇事冷静克制，很难被情绪裹挟，擅长透过表象看透事物背后的真相，行事谨慎稳重，懂得权衡局势。你不会轻易站队，内心有一套属于自己、不会轻易动摇的信念标尺。",good:"洞察力出色，遇事沉着冷静，善于思考分析，待人包容通透，情绪稳定，思虑周全。",bad:"习惯把心事藏在心底，很难向别人袒露真实自我，容易过度思虑，想太多消耗自己。",mate:"适合热血直率的伙伴，带你跳出过度思考，放下心理防备，释放压抑的情绪。"},
+    c:{analysis:"你习惯抽离旁观，看透表象背后的叙事与规则，不容易被情绪、舆论裹挟。你拥有独立的价值判断，但长期的审慎也会带来孤独感。",good:"独立思辨，洞察力强，情绪稳定，不容易盲从。",bad:"思虑过重，容易内耗，很难全然信任他人，行动偏保守。",mate:"敢行动的伙伴，帮你把思考转化为行动。"}
+  }
+];
+
+// 其余角色统一套用青年版作为兜底，如需我可以继续补齐所有角色的A/B/C三套文案
+const home = document.getElementById('page-home');
+const quiz = document.getElementById('page-quiz');
+const res = document.getElementById('page-result');
+const qText = document.getElementById('qText');
+const optBox = document.getElementById('optBox');
+const curIndex = document.getElementById('curIndex');
+const totalIndex = document.getElementById('totalIndex');
+const btnStart = document.getElementById('btnStart');
+const prevBtn = document.getElementById('prevBtn');
+const nextBtn = document.getElementById('nextBtn');
+const restartBtn = document.getElementById('restartBtn');
+
+const resAvatar = document.getElementById('resAvatar');
+const charName = document.getElementById('charName');
+const charTag = document.getElementById('charTag');
+const barFree = document.getElementById('barFree');
+const barWill = document.getElementById('barWill');
+const barGentle = document.getElementById('barGentle');
+const barWise = document.getElementById('barWise');
+const charAnalysis = document.getElementById('charAnalysis');
+const charGood = document.getElementById('charGood');
+const charBad = document.getElementById('charBad');
+const charMate = document.getElementById('charMate');
+const sameBox = document.getElementById('sameBox');
+
+let curQ = 0;
+let score = {free:0,will:0,gentle:0,wise:0};
+let answerRecord = Array(questionList.length).fill(null);
+let selectOpt = null;
+let selectedAge = null; // 存储年龄段 A/B/C
+
+totalIndex.innerText = questionList.length;
+
+// 年龄段选择
+document.querySelectorAll('.age-opt').forEach(el=>{
+  el.addEventListener('click',()=>{
+    document.querySelectorAll('.age-opt').forEach(d=>d.classList.remove('selected'));
+    el.classList.add('selected');
+    selectedAge = el.dataset.age;
+    btnStart.disabled = false;
+  })
+})
+
+btnStart.addEventListener('click',()=>{
+  if(!selectedAge) return;
+  home.classList.remove('active');
+  quiz.classList.add('active');
+  curQ = 0;
+  score = {free:0,will:0,gentle:0,wise:0};
+  answerRecord = Array(questionList.length).fill(null);
+  selectOpt = null;
+  showQuestion();
+});
+
+function showQuestion(){
+  selectOpt = answerRecord[curQ];
+  curIndex.innerText = curQ + 1;
+  const q = questionList[curQ];
+  qText.innerText = `${curQ + 1}. ${q.q}`;
+  optBox.innerHTML = '';
+
+  q.o.forEach((itemStr,i)=>{
+    const optKey = ['free','will','gentle','wise','e'][i];
+    const splitIndex = itemStr.indexOf(' ');
+    const labelText = itemStr.substring(0, splitIndex);
+    const contentText = itemStr.substring(splitIndex + 1);
+
+    const div = document.createElement('div');
+    div.className = 'opt';
+    div.innerHTML = `<span class="opt-label">${labelText}</span><span class="opt-text">${contentText}</span>`;
+    if(selectOpt === optKey) div.classList.add('selected');
+
+    div.addEventListener('click',()=>{
+      document.querySelectorAll('.opt').forEach(d=>d.classList.remove('selected'));
+      div.classList.add('selected');
+      selectOpt = optKey;
+      answerRecord[curQ] = selectOpt;
+      setTimeout(()=>{
+        curQ++;
+        if(curQ >= questionList.length){
+          calcTotalScore();
+          renderResult();
+        }else{
+          showQuestion();
+        }
+      },280);
+    });
+    optBox.appendChild(div);
+  });
+
+  prevBtn.disabled = curQ === 0;
+  nextBtn.innerText = (curQ >= questionList.length - 1) ? "查看结果" : "下一题";
+}
+
+nextBtn.addEventListener('click',()=>{
+  if(!selectOpt){alert("请选择一个答案");return;}
+  answerRecord[curQ] = selectOpt;
+  curQ++;
+  if(curQ >= questionList.length){
+    calcTotalScore();
+    renderResult();
+  }else{
+    showQuestion();
+  }
+});
+
+prevBtn.addEventListener('click',()=>{
+  if(curQ > 0){
+    curQ--;
+    selectOpt = answerRecord[curQ];
+    showQuestion();
+  }
+});
+
+function calcTotalScore(){
+  score = {free:0,will:0,gentle:0,wise:0};
+  answerRecord.forEach(ans=>{
+    if(!ans) return;
+    if(ans === 'free') score.free +=2;
+    if(ans === 'will') score.will +=2;
+    if(ans === 'gentle') score.gentle +=2;
+    if(ans === 'wise') score.wise +=2;
+    if(ans === 'e'){
+      score.free +=1;score.will +=1;score.gentle +=1;score.wise +=1;
+    }
+  });
+}
+
+function renderResult(){
+  quiz.classList.remove('active');
+  res.classList.add('active');
+
+  let bestChar = charList[0];
+  let minDist = 9999;
+  charList.forEach(ch=>{
+    const dx = score.free - ch.free;
+    const dy = score.will - ch.will;
+    const dz = score.gentle - ch.gentle;
+    const dw = score.wise - ch.wise;
+    const dist = Math.sqrt(dx*dx+dy*dy+dz*dz+dw*dw);
+    if(dist < minDist){
+      minDist = dist;
+      bestChar = ch;
+    }
+  });
+
+  resAvatar.src = bestChar.avatar;
+  charName.innerText = bestChar.name;
+  charTag.innerText = bestChar.tag;
+
+  barFree.style.width = `${(score.free/30)*100}%`;
+  barWill.style.width = `${(score.will/30)*100}%`;
+  barGentle.style.width = `${(score.gentle/30)*100}%`;
+  barWise.style.width = `${(score.wise/30)*100}%`;
+
+  // 读取对应年龄段文案，没有单独a/b/c字段就默认B青年版
+  let txt;
+  if(bestChar[selectedAge]){
+    txt = bestChar[selectedAge];
+  }else{
+    txt = bestChar.b;
+  }
+  charAnalysis.innerText = txt.analysis;
+  charGood.innerText = txt.good;
+  charBad.innerText = txt.bad;
+  charMate.innerText = txt.mate;
+
+  sameBox.innerHTML = '';
+  if(bestChar.same){
+    bestChar.same.forEach(name=>{
+      const span = document.createElement('span');
+      span.className = 'same-tag';
+      span.innerText = name;
+      sameBox.appendChild(span);
+    });
+  }
+}
+
+restartBtn.addEventListener('click',()=>{
+  curQ = 0;
+  score = {free:0,will:0,gentle:0,wise:0};
+  answerRecord = Array(questionList.length).fill(null);
+  selectOpt = null;
+  selectedAge = null;
+  res.classList.remove('active');
+  home.classList.add('active');
+  document.querySelectorAll('.age-opt').forEach(d=>d.classList.remove('selected'));
+  btnStart.disabled = true;
+});
+</script>
+</body>
+</html>
